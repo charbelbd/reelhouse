@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MovieController;
+use App\Http\Controllers\ScreeningController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => ['service' => 'main-api', 'status' => 'ok']);
@@ -12,6 +13,10 @@ Route::post('login', [AuthController::class, 'login'])->middleware('throttle:aut
 Route::get('movies', [MovieController::class, 'index']);
 Route::get('movies/{id}', [MovieController::class, 'show'])->whereNumber('id');
 Route::get('genres', [MovieController::class, 'genres']);
+
+Route::get('screenings', [ScreeningController::class, 'index']);
+Route::get('screenings/{id}', [ScreeningController::class, 'show'])->whereNumber('id');
+Route::get('time', [ScreeningController::class, 'time']);
 
 Route::middleware(['auth:sanctum', 'not-banned'])->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
