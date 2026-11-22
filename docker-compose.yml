@@ -41,13 +41,23 @@ services:
       QUEUE_CONNECTION: sync
       FILESYSTEM_DISK: public
       PHP_CLI_SERVER_WORKERS: 8
-      MAIL_MAILER: log
+      MAIL_MAILER: smtp
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      MAIL_FROM_ADDRESS: hello@reelhouse.test
+      MAIL_FROM_NAME: Reelhouse
     volumes:
       - ./services/main-api:/var/www/app
       - main_api_vendor:/var/www/app/vendor
     depends_on:
       mysql:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8000/up"]
+      interval: 10s
+      timeout: 5s
+      retries: 60
+      start_period: 30s
 
   mysql:
     image: mysql:8.0
@@ -67,6 +77,22 @@ services:
       interval: 5s
       timeout: 5s
       retries: 30
+
+  phpmyadmin:
+    image: phpmyadmin:5
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql
+    depends_on:
+      - mysql
+
+  mailpit:
+    image: axllent/mailpit:v1.21
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
 
 volumes:
   mysql_data:
