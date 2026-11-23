@@ -46,6 +46,12 @@ services:
       MAIL_PORT: 1025
       MAIL_FROM_ADDRESS: hello@reelhouse.test
       MAIL_FROM_NAME: Reelhouse
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      FACEBOOK_CLIENT_ID: ${FACEBOOK_CLIENT_ID:-}
+      FACEBOOK_CLIENT_SECRET: ${FACEBOOK_CLIENT_SECRET:-}
     volumes:
       - ./services/main-api:/var/www/app
       - main_api_vendor:/var/www/app/vendor

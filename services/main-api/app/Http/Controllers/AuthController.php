@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 
 class AuthController extends Controller
@@ -112,6 +115,41 @@ class AuthController extends Controller
         return response()->json(['message' => 'Password changed !']);
     }
 
+    public function forgotPassword(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        Password::sendResetLink(['email' => strtolower($request->email)]);
+
+        return response()->json(['message' => 'If this email has an account, a reset link has been sent.']);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => ['required', 'confirmed', PasswordRule::min(8)->letters()->numbers()],
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function (User $user, string $password) {
+                $user->password = $password;
+                $user->setRememberToken(Str::random(60));
+                $user->save();
+                $user->tokens()->delete();
+                event(new PasswordReset($user));
+            }
+        );
+
+        if ($status !== Password::PASSWORD_RESET) {
+            return response()->json(['message' => 'This reset link is invalid or has expired.'], 422);
+        }
+
+        return response()->json(['message' => 'Password reset. You can now log in.']);
+    }
+
     public function updatePrivacy(Request $request)
     {
         $data = $request->validate([
@@ -128,8 +166,22 @@ class AuthController extends Controller
         return response()->json(['message' => 'Privacy settings saved !', 'user' => $this->profile($user)]);
     }
 
+    public function updateGenres(Request $request)
+    {
+        $data = $request->validate([
+            'genre_ids' => 'present|array|max:10',
+            'genre_ids.*' => 'integer|exists:genres,id',
+        ]);
+
+        $request->user()->favoriteGenres()->sync($data['genre_ids']);
+
+        return response()->json(['message' => 'Favourite genres saved !', 'user' => $this->profile($request->user())]);
+    }
+
     private function profile(User $user): array
     {
+        $user->load('favoriteGenres');
+
         return array_merge($user->toArray(), [
             'has_password' => ! empty($user->password),
             'is_admin' => $user->isAdmin(),
