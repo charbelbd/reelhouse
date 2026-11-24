@@ -3,12 +3,20 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MovieController;
 use App\Http\Controllers\ScreeningController;
+use App\Http\Controllers\SocialAuthController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => ['service' => 'main-api', 'status' => 'ok']);
 
 Route::post('register', [AuthController::class, 'register'])->middleware('throttle:auth');
 Route::post('login', [AuthController::class, 'login'])->middleware('throttle:auth');
+Route::post('forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:password-email');
+Route::post('reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:password-email');
+Route::post('email/verify', [\App\Http\Controllers\EmailVerificationController::class, 'verify'])->middleware('throttle:password-email');
+
+Route::get('auth/providers', [SocialAuthController::class, 'providers']);
+Route::get('auth/{provider}/redirect', [SocialAuthController::class, 'redirect']);
+Route::get('auth/{provider}/callback', [SocialAuthController::class, 'callback']);
 
 Route::get('movies', [MovieController::class, 'index']);
 Route::get('movies/{id}', [MovieController::class, 'show'])->whereNumber('id');
@@ -19,9 +27,12 @@ Route::get('screenings/{id}', [ScreeningController::class, 'show'])->whereNumber
 Route::get('time', [ScreeningController::class, 'time']);
 
 Route::middleware(['auth:sanctum', 'not-banned'])->group(function () {
+    Route::post('email/verification-notification', [\App\Http\Controllers\EmailVerificationController::class, 'send'])->middleware('throttle:password-email');
+
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('me', [AuthController::class, 'me']);
     Route::put('me', [AuthController::class, 'updateProfile']);
     Route::put('me/password', [AuthController::class, 'changePassword']);
     Route::put('me/privacy', [AuthController::class, 'updatePrivacy']);
+    Route::put('me/genres', [AuthController::class, 'updateGenres']);
 });

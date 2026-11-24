@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Genre;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -34,6 +35,7 @@ class UserSeeder extends Seeder
                 'bio' => $bio,
                 'email_verified_at' => now(),
             ]);
+            $user->favoriteGenres()->sync(Genre::whereIn('slug', $genres)->pluck('id'));
         }
 
         User::where('username', 'nour')->update(['show_watch_activity' => false]);
