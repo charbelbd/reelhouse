@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Genre;
 use App\Models\Movie;
 use App\Models\Person;
+use App\Services\TmdbService;
 use Illuminate\Http\Request;
+use RuntimeException;
 
 class MovieController extends Controller
 {
@@ -93,5 +95,21 @@ class MovieController extends Controller
     public function genres()
     {
         return Genre::withCount('movies')->orderBy('name')->get();
+    }
+
+    public function fromTmdb($tmdbId, TmdbService $tmdb)
+    {
+        $existing = Movie::where('tmdb_id', $tmdbId)->first();
+        if ($existing) {
+            return response()->json(['id' => $existing->id]);
+        }
+
+        try {
+            $movie = $tmdb->import((int) $tmdbId);
+        } catch (RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 503);
+        }
+
+        return response()->json(['id' => $movie->id], 201);
     }
 }

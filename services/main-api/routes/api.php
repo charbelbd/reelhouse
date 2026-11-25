@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MovieController;
 use App\Http\Controllers\ScreeningController;
 use App\Http\Controllers\SocialAuthController;
+use App\Http\Controllers\TmdbController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => ['service' => 'main-api', 'status' => 'ok']);
@@ -22,6 +23,12 @@ Route::get('movies', [MovieController::class, 'index']);
 Route::get('movies/{id}', [MovieController::class, 'show'])->whereNumber('id');
 Route::get('genres', [MovieController::class, 'genres']);
 
+Route::get('tmdb/status', [TmdbController::class, 'status']);
+Route::get('tmdb/popular', [TmdbController::class, 'popular']);
+Route::get('tmdb/upcoming', [TmdbController::class, 'upcoming']);
+Route::get('tmdb/search', [TmdbController::class, 'search']);
+Route::get('tmdb/movies/{tmdbId}', [TmdbController::class, 'show'])->whereNumber('tmdbId');
+
 Route::get('screenings', [ScreeningController::class, 'index']);
 Route::get('screenings/{id}', [ScreeningController::class, 'show'])->whereNumber('id');
 Route::get('time', [ScreeningController::class, 'time']);
@@ -35,4 +42,6 @@ Route::middleware(['auth:sanctum', 'not-banned'])->group(function () {
     Route::put('me/password', [AuthController::class, 'changePassword']);
     Route::put('me/privacy', [AuthController::class, 'updatePrivacy']);
     Route::put('me/genres', [AuthController::class, 'updateGenres']);
+
+    Route::post('movies/tmdb/{tmdbId}', [MovieController::class, 'fromTmdb'])->whereNumber('tmdbId');
 });
