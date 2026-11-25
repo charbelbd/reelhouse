@@ -22,6 +22,11 @@ return [
         ],
     ],
 
+    'tmdb' => [
+        'key' => env('TMDB_API_KEY'),
+        'token' => env('TMDB_READ_TOKEN'),
+    ],
+
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
