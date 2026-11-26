@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MovieController;
 use App\Http\Controllers\RecommendationController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\ScreeningController;
 use App\Http\Controllers\SocialAuthController;
@@ -23,6 +24,7 @@ Route::get('auth/{provider}/callback', [SocialAuthController::class, 'callback']
 
 Route::get('movies', [MovieController::class, 'index']);
 Route::get('movies/{id}', [MovieController::class, 'show'])->whereNumber('id');
+Route::get('movies/{id}/reviews', [ReviewController::class, 'index'])->whereNumber('id');
 Route::get('genres', [MovieController::class, 'genres']);
 
 Route::get('tmdb/status', [TmdbController::class, 'status']);
@@ -46,8 +48,13 @@ Route::middleware(['auth:sanctum', 'not-banned'])->group(function () {
     Route::put('me/password', [AuthController::class, 'changePassword']);
     Route::put('me/privacy', [AuthController::class, 'updatePrivacy']);
     Route::put('me/genres', [AuthController::class, 'updateGenres']);
+    Route::get('me/reviews', [ReviewController::class, 'mine']);
 
     Route::post('movies/tmdb/{tmdbId}', [MovieController::class, 'fromTmdb'])->whereNumber('tmdbId');
+
+    Route::post('movies/{id}/reviews', [ReviewController::class, 'store'])->whereNumber('id');
+    Route::put('reviews/{id}', [ReviewController::class, 'update'])->whereNumber('id');
+    Route::delete('reviews/{id}', [ReviewController::class, 'destroy'])->whereNumber('id');
 
     Route::get('rooms/{room}/access', [RoomController::class, 'access']);
 });

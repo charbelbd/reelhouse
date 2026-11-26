@@ -1,8 +1,10 @@
 <?php
 
 use App\Models\Movie;
+use App\Models\Review;
 use App\Models\Screening;
 use App\Models\User;
+use App\Services\SentimentClient;
 use Illuminate\Support\Facades\Artisan;
 
 Artisan::command('reelhouse:screening {movie?} {--in=1}', function ($movie = null) {
@@ -21,6 +23,18 @@ Artisan::command('reelhouse:screening {movie?} {--in=1}', function ($movie = nul
 
     $this->info("Scheduled \"{$film->title}\" at {$screening->starts_at} (screening #{$screening->id}).");
 })->purpose('Schedule a live screening that starts soon (for demos)');
+
+Artisan::command('reelhouse:analyze-reviews', function (SentimentClient $client) {
+    $count = 0;
+    Review::whereNull('sentiment')->whereNotNull('body')->each(function ($review) use ($client, &$count) {
+        $result = $client->analyze($review->body);
+        if ($result) {
+            $review->update($result);
+            $count++;
+        }
+    });
+    $this->info("$count reviews analysed.");
+})->purpose('Send reviews without a sentiment label to the sentiment service');
 
 Artisan::command('reelhouse:install', function () {
     $this->call('migrate', ['--force' => true]);

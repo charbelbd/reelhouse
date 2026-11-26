@@ -46,6 +46,7 @@ return [
     ],
 
     'microservices' => [
+        'sentiment' => env('SENTIMENT_SERVICE_URL', 'http://sentiment-service:8000'),
         'chat' => env('CHAT_SERVICE_URL', 'http://chat-service:8000'),
     ],
 
