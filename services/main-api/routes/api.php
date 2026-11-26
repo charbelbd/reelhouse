@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MovieController;
+use App\Http\Controllers\RoomController;
 use App\Http\Controllers\ScreeningController;
 use App\Http\Controllers\SocialAuthController;
 use App\Http\Controllers\TmdbController;
@@ -44,4 +45,6 @@ Route::middleware(['auth:sanctum', 'not-banned'])->group(function () {
     Route::put('me/genres', [AuthController::class, 'updateGenres']);
 
     Route::post('movies/tmdb/{tmdbId}', [MovieController::class, 'fromTmdb'])->whereNumber('tmdbId');
+
+    Route::get('rooms/{room}/access', [RoomController::class, 'access']);
 });

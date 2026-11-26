@@ -25,6 +25,8 @@ services:
       - ./gateway/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - main-api
+      - chat-service
+      - chat-ws
 
   main-api:
     <<: *laravel
@@ -67,6 +69,55 @@ services:
       retries: 60
       start_period: 30s
 
+  chat-service:
+    <<: *laravel
+    environment: &chat-env
+      <<: *mysql-env
+      SERVICE_NAME: chat-service
+      RUN_INSTALL: "true"
+      DB_DATABASE: reelhouse_chat
+      CACHE_STORE: database
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
+      PHP_CLI_SERVER_WORKERS: 8
+      MAIN_API_URL: http://main-api:8000
+      BROADCAST_CONNECTION: reverb
+      REVERB_APP_ID: ${REVERB_APP_ID:-reelhouse}
+      REVERB_APP_KEY: ${REVERB_APP_KEY:-reelhouse-key}
+      REVERB_APP_SECRET: ${REVERB_APP_SECRET:-reelhouse-secret}
+      REVERB_HOST: chat-ws
+      REVERB_PORT: 8080
+      REVERB_SCHEME: http
+      REVERB_SERVER_HOST: 0.0.0.0
+      REVERB_SERVER_PORT: 8080
+    volumes:
+      - ./services/chat-service:/var/www/app
+      - chat_vendor:/var/www/app/vendor
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8000/up"]
+      interval: 10s
+      timeout: 5s
+      retries: 60
+      start_period: 30s
+
+  chat-ws:
+    <<: *laravel
+    command: ["php", "artisan", "reverb:start", "--host=0.0.0.0", "--port=8080"]
+    environment:
+      <<: *chat-env
+      SERVICE_NAME: chat-ws
+      RUN_INSTALL: "false"
+      SKIP_COMPOSER: "true"
+    volumes:
+      - ./services/chat-service:/var/www/app
+      - chat_vendor:/var/www/app/vendor
+    depends_on:
+      chat-service:
+        condition: service_healthy
+
   mysql:
     image: mysql:8.0
     restart: unless-stopped
@@ -105,3 +156,4 @@ services:
 volumes:
   mysql_data:
   main_api_vendor:
+  chat_vendor:

@@ -45,5 +45,9 @@ return [
         'redirect' => env('APP_URL').'/api/auth/facebook/callback',
     ],
 
+    'microservices' => [
+        'chat' => env('CHAT_SERVICE_URL', 'http://chat-service:8000'),
+    ],
+
     'frontend_url' => env('FRONTEND_URL', 'http://localhost:8080'),
 ];
