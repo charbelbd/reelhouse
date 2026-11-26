@@ -48,6 +48,7 @@ services:
       MAIL_PORT: 1025
       MAIL_FROM_ADDRESS: hello@reelhouse.test
       MAIL_FROM_NAME: Reelhouse
+      SENTIMENT_SERVICE_URL: http://sentiment-service:8000
       TMDB_API_KEY: ${TMDB_API_KEY:-}
       TMDB_READ_TOKEN: ${TMDB_READ_TOKEN:-}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
@@ -62,6 +63,27 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      sentiment-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8000/up"]
+      interval: 10s
+      timeout: 5s
+      retries: 60
+      start_period: 30s
+
+  sentiment-service:
+    <<: *laravel
+    environment:
+      SERVICE_NAME: sentiment-service
+      DB_CONNECTION: sqlite
+      CACHE_STORE: array
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
+      PHP_CLI_SERVER_WORKERS: 4
+    volumes:
+      - ./services/sentiment-service:/var/www/app
+      - sentiment_vendor:/var/www/app/vendor
     healthcheck:
       test: ["CMD", "curl", "-fs", "http://localhost:8000/up"]
       interval: 10s
@@ -156,4 +178,5 @@ services:
 volumes:
   mysql_data:
   main_api_vendor:
+  sentiment_vendor:
   chat_vendor:
