@@ -49,5 +49,9 @@ return [
         'chat' => env('CHAT_SERVICE_URL', 'http://chat-service:8000'),
     ],
 
+    'overpass' => [
+        'url' => env('OVERPASS_URL', 'https://overpass-api.de/api/interpreter'),
+    ],
+
     'frontend_url' => env('FRONTEND_URL', 'http://localhost:8080'),
 ];

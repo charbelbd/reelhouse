@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MovieController;
+use App\Http\Controllers\RecommendationController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\ScreeningController;
 use App\Http\Controllers\SocialAuthController;
@@ -33,6 +34,8 @@ Route::get('tmdb/movies/{tmdbId}', [TmdbController::class, 'show'])->whereNumber
 Route::get('screenings', [ScreeningController::class, 'index']);
 Route::get('screenings/{id}', [ScreeningController::class, 'show'])->whereNumber('id');
 Route::get('time', [ScreeningController::class, 'time']);
+
+Route::get('cinemas', [RecommendationController::class, 'cinemas']);
 
 Route::middleware(['auth:sanctum', 'not-banned'])->group(function () {
     Route::post('email/verification-notification', [\App\Http\Controllers\EmailVerificationController::class, 'send'])->middleware('throttle:password-email');
