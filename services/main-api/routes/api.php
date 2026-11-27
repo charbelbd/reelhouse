@@ -26,6 +26,7 @@ Route::get('movies', [MovieController::class, 'index']);
 Route::get('movies/{id}', [MovieController::class, 'show'])->whereNumber('id');
 Route::get('movies/{id}/reviews', [ReviewController::class, 'index'])->whereNumber('id');
 Route::get('genres', [MovieController::class, 'genres']);
+Route::get('people/{id}', [MovieController::class, 'person'])->whereNumber('id');
 
 Route::get('tmdb/status', [TmdbController::class, 'status']);
 Route::get('tmdb/popular', [TmdbController::class, 'popular']);
