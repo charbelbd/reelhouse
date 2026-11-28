@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Movie;
+use App\Models\MovieNight;
 use App\Models\Screening;
 use Illuminate\Http\Request;
 
@@ -29,12 +30,15 @@ class RoomController extends Controller
         }
 
         if ($type === 'screening') {
-            $s = Screening::with('movie')->findOrFail($id);
-            $allowed = ! $s->movie_night_id;
+            $s = Screening::with(['movie', 'movieNight'])->findOrFail($id);
+            $allowed = ! $s->movie_night_id || $s->movieNight->isParticipant($user);
 
             return response()->json(['allowed' => $allowed, 'title' => 'Live: '.$s->movie->title], $allowed ? 200 : 403);
         }
 
-        return response()->json(['allowed' => false, 'message' => 'Movie night rooms are not ready yet.'], 404);
+        $night = MovieNight::findOrFail($id);
+        $allowed = $night->isParticipant($user);
+
+        return response()->json(['allowed' => $allowed, 'title' => $night->title], $allowed ? 200 : 403);
     }
 }

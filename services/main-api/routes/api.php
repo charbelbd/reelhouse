@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MovieController;
+use App\Http\Controllers\MovieNightController;
 use App\Http\Controllers\RecommendationController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\RoomController;
@@ -56,6 +57,20 @@ Route::middleware(['auth:sanctum', 'not-banned'])->group(function () {
     Route::post('movies/{id}/reviews', [ReviewController::class, 'store'])->whereNumber('id');
     Route::put('reviews/{id}', [ReviewController::class, 'update'])->whereNumber('id');
     Route::delete('reviews/{id}', [ReviewController::class, 'destroy'])->whereNumber('id');
+
+    Route::get('movie-nights', [MovieNightController::class, 'index']);
+    Route::post('movie-nights', [MovieNightController::class, 'store']);
+    Route::get('movie-nights/{id}', [MovieNightController::class, 'show'])->whereNumber('id');
+    Route::put('movie-nights/{id}', [MovieNightController::class, 'update'])->whereNumber('id');
+    Route::delete('movie-nights/{id}', [MovieNightController::class, 'destroy'])->whereNumber('id');
+    Route::post('movie-nights/{id}/invite', [MovieNightController::class, 'invite'])->whereNumber('id');
+    Route::post('movie-nights/{id}/respond', [MovieNightController::class, 'respond'])->whereNumber('id');
+    Route::post('movie-nights/{id}/candidates', [MovieNightController::class, 'addCandidate'])->whereNumber('id');
+    Route::delete('movie-nights/{id}/candidates/{candidateId}', [MovieNightController::class, 'removeCandidate'])->whereNumber(['id', 'candidateId']);
+    Route::post('movie-nights/{id}/vote', [MovieNightController::class, 'vote'])->whereNumber('id');
+    Route::post('movie-nights/{id}/close', [MovieNightController::class, 'close'])->whereNumber('id');
+    Route::post('movie-nights/{id}/reopen', [MovieNightController::class, 'reopen'])->whereNumber('id');
+    Route::post('movie-nights/{id}/start', [MovieNightController::class, 'start'])->whereNumber('id');
 
     Route::get('rooms/{room}/access', [RoomController::class, 'access']);
 });
