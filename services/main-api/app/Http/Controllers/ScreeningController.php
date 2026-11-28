@@ -27,7 +27,14 @@ class ScreeningController extends Controller
 
     public function show(Request $request, $id)
     {
-        $screening = Screening::with(['movie.genres', 'movie.directors'])->findOrFail($id);
+        $screening = Screening::with(['movie.genres', 'movie.directors', 'movieNight:id,title,host_id'])->findOrFail($id);
+
+        if ($screening->movie_night_id) {
+            $user = $request->user('sanctum');
+            if (! $user || ! $screening->movieNight->isParticipant($user)) {
+                return response()->json(['message' => 'This is a private screening.'], 403);
+            }
+        }
 
         $data = $screening->toArray();
         $data['server_time'] = now()->toIso8601String();
